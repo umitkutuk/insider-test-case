@@ -84,4 +84,23 @@ interface FixtureRepositoryInterface
      * @return \App\Fixture[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
     public function getFixtureByWeek(int $week, int $seasonId);
+
+    /**
+     * @param int $team1
+     * @param int $team2
+     * @param int $week
+     * @param int $seasonId
+     * @param int $leagueId
+     * @return bool
+     */
+    public function fixtureExists(int $team1, int $team2, int $week, int $seasonId, int $leagueId): bool;
+
+    /**
+     * @param int $team1
+     * @param int $team2
+     * @param int $seasonId
+     * @param int $leagueId
+     * @return mixed
+     */
+    public function getFixtureForHomeTeam(int $team1, int $team2, int $seasonId, int $leagueId);
 }

@@ -99,6 +99,7 @@
                     },
                     success: function(resultData) {
                         alert(resultData)
+                        location.reload();
                     }
                 });
             });
@@ -111,6 +112,7 @@
                     },
                     success: function(resultData) {
                         alert(resultData)
+                        location.reload();
                     }
                 });
             });

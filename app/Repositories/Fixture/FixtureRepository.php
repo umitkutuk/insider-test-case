@@ -125,4 +125,71 @@ class FixtureRepository implements FixtureRepositoryInterface
             ->where('season_id', $seasonId)
             ->get();
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function fixtureExists(int $team1, int $team2, int $week, int $seasonId, int $leagueId): bool
+    {
+        $t1 =  $this->getBuilder()
+            ->where(function ($query) use ($team2, $team1) {
+                $query->orWhere(function ($q) use ($team2, $team1) {
+                    $q
+                        ->where('team_1', $team1)
+                        ->where('team_2', $team2);
+                });
+
+                $query->orWhere(function ($q) use ($team2, $team1) {
+                    $q->where('team_1', $team2)
+                        ->where('team_2', $team1);
+                });
+            })
+            ->where('season_id', $seasonId)
+            ->where('league_id', $leagueId)
+            ->exists();
+
+        $t2 =  $this->getBuilder()
+            ->where(function ($query) use ($week, $team2, $team1) {
+                $query->orWhere(function ($q) use ($week, $team2, $team1) {
+                    $q
+                        ->where('team_1', $team1)
+                        ->where('week', $week);
+                });
+
+                $query->orWhere(function ($q) use ($week, $team2, $team1) {
+                    $q->orWhere('team_2', $team2)
+                        ->where('week', $week);
+                });
+            })
+            ->where(function ($query) use ($week, $team2, $team1) {
+                $query->orWhere(function ($q) use ($week, $team2, $team1) {
+                    $q
+                        ->where('team_1', $team2)
+                        ->where('week', $week);
+                });
+
+                $query->orWhere(function ($q) use ($week, $team2, $team1) {
+                    $q->orWhere('team_2', $team1)
+                        ->where('week', $week);
+                });
+            })
+            ->where('season_id', $seasonId)
+            ->where('league_id', $leagueId)
+            ->exists();
+
+        return $t2 || $t1;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getFixtureForHomeTeam(int $team1, int $team2, int $seasonId, int $leagueId)
+    {
+        return $this->getBuilder()
+            ->where('team_1', $team1)
+            ->where('team_2', $team2)
+            ->where('season_id', $seasonId)
+            ->where('league_id', $leagueId)
+            ->first();
+    }
 }

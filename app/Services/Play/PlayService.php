@@ -47,10 +47,17 @@ class PlayService implements PlayServiceInterface
         $this->matchService = $matchService;
     }
 
-    public function playNextWeek()
+    /**
+     * @inheritdoc
+     */
+    public function playNextWeek(): string
     {
         //Not finished seasons
         $seasons = $this->seasonService->getNotFinished();
+
+        if ($seasons->count() == 0){
+            return 'Match Not Found!';
+        }
 
         foreach ($seasons as $season){
             if ($season->week === $season->total_week) continue;
@@ -71,7 +78,14 @@ class PlayService implements PlayServiceInterface
             $season->week += 1;
             $season->save();
 
+            if ($season->week === $season->total_week) {
+                $season->is_done = true;
+                $season->save();
+            }
+
         }
+
+        return 'Success';
     }
 
     /**

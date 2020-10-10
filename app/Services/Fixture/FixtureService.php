@@ -94,6 +94,45 @@ class FixtureService implements FixtureServiceInterface
     {
         $startsAt = $season->stats_at;
         $teams = $this->teamService->getTeamsByLeagueId($season->league_id);
+        $teamIds = $teams->pluck('id')->toArray();
+
+        $teamCount = count($teamIds);
+        $matchCount = $teamCount / 2;
+        $totalWeek = ($teamCount - 1) * 2;
+
+        for ($i = 1; $i<= $totalWeek; $i++){
+
+            $k = 0;
+            while($k !== $matchCount){
+                $rand = array_rand($teamIds, 2);
+
+                [$team1, $team2] = [$teamIds[$rand[0]], $teamIds[$rand[1]]];
+
+                if (!$this->fixtureExists($team1, $team2, $i, $season->id, $season->league_id)){
+                    $order = $this->countOrder($team1, $team2, $season->id, $season->league_id);
+
+                    $homeTeam = $this->getFixtureForHomeTeam($team1, $team2, $season->id, $season->league_id);
+
+                    $homeTeamId =  is_null($homeTeam)
+                        ? $team1
+                        : ($homeTeam->id === $team1 ? $team2 : $team1);
+
+                    $this->createFixture([
+                        'season_id' => $season->id,
+                        'league_id' => $season->league_id,
+                        'team_1' => $team1,
+                        'team_2' => $team2,
+                        'home_team_id' => $homeTeamId,
+                        'week' => $i,
+                        'order' => $order+1,
+                        'starts_at' => Carbon::parse($startsAt)->addWeeks($i),
+                    ]);
+
+                    ++$k;
+                }
+            }
+
+        }
 
         foreach ($teams as $team) {
             $this->scoreService->createScore([
@@ -102,29 +141,10 @@ class FixtureService implements FixtureServiceInterface
                 'team_id' => $team->id,
                 'score' => 0
             ]);
-
-            $week = 1;
-            foreach ($teams as  $t) {
-                if ($team->id === $t->id) continue;
-
-                $order = $this->countOrder($team->id, $t->id, $season->id, $season->league_id);
-                $this->createFixture([
-                    'season_id' => $season->id,
-                    'league_id' => $season->league_id,
-                    'team_1' => $team->id,
-                    'team_2' => $t->id,
-                    'home_team_id' => $team->id,
-                    'week' => $week,
-                    'order' => $order+1,
-                    'starts_at' => Carbon::parse($startsAt)->addWeeks($week),
-                ]);
-
-                $week++;
-            }
-
-            $season->total_week = $week;
-            $season->save();
         }
+
+        $season->total_week = $totalWeek;
+        $season->save();
 
         return true;
     }
@@ -143,5 +163,21 @@ class FixtureService implements FixtureServiceInterface
     public function getFixtureByWeek(int $week, int $seasonId)
     {
         return $this->fixtureRepository->getFixtureByWeek($week, $seasonId);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function fixtureExists(int $team1, int $team2, int $week, int $seasonId, int $leagueId): bool
+    {
+        return $this->fixtureRepository->fixtureExists($team1, $team2, $week, $seasonId, $leagueId);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getFixtureForHomeTeam(int $team1, int $team2, int $seasonId, int $leagueId)
+    {
+        return $this->fixtureRepository->getFixtureForHomeTeam($team1, $team2, $seasonId, $leagueId);
     }
 }

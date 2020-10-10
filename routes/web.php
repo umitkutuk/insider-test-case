@@ -43,8 +43,5 @@ Route::post('/plays/play-one', 'PlayController@playOne')->name('plays.play-one')
 
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::get('/tournaments', 'TournamentController@index')->name('tournaments');
-    Route::get('/tournaments-store', 'TournamentController@store')->name('tournaments-store');
-    Route::get('/tournaments-score', 'TournamentController@score')->name('tournaments-score');
 
 });

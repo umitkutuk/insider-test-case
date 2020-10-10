@@ -33,9 +33,7 @@ class PlayController extends Controller
 
     public function playOne()
     {
-        $this->playService->playNextWeek();
-
-        return 'One';
+        return $this->playService->playNextWeek();
     }
 
     public function playAll()

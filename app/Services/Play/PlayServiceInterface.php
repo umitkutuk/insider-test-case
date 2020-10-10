@@ -7,6 +7,12 @@ use App\Team;
 interface PlayServiceInterface
 {
     /**
+     * @return string
+     * @throws \Exception
+     */
+    public function playNextWeek(): string;
+
+    /**
      * @param \App\Team $team1
      * @param \App\Team $team2
      * @return \App\Team
